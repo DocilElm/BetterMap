@@ -349,14 +349,14 @@ class Room {
                 if (!secretPos) return
                 let [ x, y, z ] = secretPos
 
-                if (this.dungeon.collectedSecrets.has(x + "," + y + "," + z)) return;
+                if (this.dungeon.collectedSecrets.has(x + "," + y + "," + z)) return
 
-                if (type == "chest") drawBoxAtBlock(x+0.0625, y, z+0.0625, 0, 1, 0, 0.875, 0.875)
-                if (type == "item") drawBoxAtBlock(x + 0.25, y, z + 0.25, 0, 0, 1, 0.5, 0.5)
-                if (type == "wither") drawBoxAtBlock(x + 0.25, y, z + 0.25, 1, 0, 1, 0.5, 0.5)
-                if (type == "bat") drawBoxAtBlock(x + 0.25, y + 0.25, z + 0.25, 0, 1, 0, 0.5, 0.5)
-                if (type == "redstone_key") drawBoxAtBlock(x + 0.25, y, z + 0.25, 1, 0, 0, 0.5, 0.5)
-            });
+                if (type == "chest") drawBoxAtBlock(x + 0.0625, y, z + 0.0625, 0.875, 0.875, 0, 1, 0)
+                if (type == "item") drawBoxAtBlock(x + 0.25, y, z + 0.25, 0.5, 0.5, 0, 1, 1)
+                if (type == "wither") drawBoxAtBlock(x + 0.25, y, z + 0.25, 0.5, 0.5, 1, 0, 1)
+                if (type == "bat") drawBoxAtBlock(x + 0.25, y + 0.25, z + 0.25, 0.5, 0.5, 0, 1, 0)
+                if (type == "redstone_key") drawBoxAtBlock(x + 0.25, y, z + 0.25, 0.5, 0.5, 1, 0, 0)
+            })
         })
 
     }

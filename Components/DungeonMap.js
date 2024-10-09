@@ -14,10 +14,10 @@ import settings from "../Extra/Settings/CurrentSettings.js"
 import { RoomEvents, toDisplayString } from "./RoomEvent.js"
 import RoomComponent from "../Utils/RoomComponent.js"
 
-let PlayerComparator = Java.type("net.minecraft.client.gui.GuiPlayerTabOverlay").PlayerComparator
-let c = PlayerComparator.class.getDeclaredConstructor()
-c.setAccessible(true);
-let sorter = c.newInstance()
+// let PlayerComparator = Java.type("net.minecraft.client.gui.GuiPlayerTabOverlay").PlayerComparator
+// let c = PlayerComparator.class.getDeclaredConstructor()
+// c.setAccessible(true);
+// let sorter = c.newInstance()
 
 class DungeonMap {
     constructor(floor, deadPlayers, registerEvents = true) {
@@ -47,7 +47,8 @@ class DungeonMap {
         /**
          * @type {Set<Door>} A set of all wither doors in the dungeon
          */
-        this.witherDoors = new Set()
+        /** @type {?Door} */
+        this.witherDoor = null
 
         this.fullRoomScaleMap = 0 // How many pixels on the map is 32 blocks
         this.widthRoomImageMap = 0 // How wide the main boxes are on the map
@@ -97,6 +98,8 @@ class DungeonMap {
         this.lastXY = undefined
         this.lastStandingPos = null // Position of where the player was last standing
         this.lastRoomChange = null // Time the player last walked into a new room component
+        /** @type {?Room} */
+        this._currentRoom = null
 
         // Simulate changing bloccks to air to fix green room not having air border around it
         this.setAirLocs = new Set()
@@ -385,6 +388,7 @@ class DungeonMap {
         let room = this.getRoomAtComponent(currPos)
         if (room && room.roofHeight && room.data) {
             if (!room.corner) room.findRotationAndCorner()
+            this._currentRoom = room
             return
         }
 
@@ -466,11 +470,13 @@ class DungeonMap {
                     else if (doorBlockId == 97) door.type = Room.SPAWN
                     else if (doorBlockId == 173) {
                         door.type = Room.BLACK
-                        this.witherDoors.add(door)
+                        // this.witherDoors.add(door)
+                        this.witherDoor = door
                     }
                     else if (doorBlockId == 159) {
                         door.type = Room.BLOOD
-                        this.witherDoors.add(door)
+                        // this.witherDoors.add(door)
+                        this.witherDoor = door
                     }
 
                     // ChatLib.chat(`Added door ${door} from ${room}`)
@@ -683,6 +689,7 @@ class DungeonMap {
         this.collectedSecrets.clear()
         this.triggers.forEach(a => a.unregister())
         this.triggers = []
+        this._currentRoom = null
     }
 
     /**
@@ -697,7 +704,7 @@ class DungeonMap {
      */
     updatePlayers() {
         if (!Player.getPlayer()) return; //How tf is this null sometimes wtf 
-        let pl = Player.getPlayer().field_71174_a.func_175106_d().sort((a, b) => sorter.compare(a, b)); // Tab player list
+        let pl = Player.getPlayer().field_71174_a.func_175106_d()//.sort((a, b) => sorter.compare(a, b)); // Tab player list
 
         let i = 0;
 
@@ -865,7 +872,7 @@ class DungeonMap {
      */
     updatePlayersFast() {
         World.getAllPlayers().forEach(player => {
-            let playerName = getPlayerName(player);
+            let playerName = getPlayerName(player)
             let p = this.players[this.playersNameToId[playerName]]
             if (!p) return
 
@@ -1054,8 +1061,9 @@ class DungeonMap {
                     let existingDoor = this.doors.get(position.arrayStr)
                     if (existingDoor) {
                         // Wither door was opened
-                        if (existingDoor.type == Room.BLACK && doorType !== Room.BLACK) {
-                            this.witherDoors.delete(existingDoor)
+                        if (existingDoor.type == Room.BLACK && doorType !== Room.BLACK && existingDoor.toString() === this.witherDoor.toString()) {
+                            // this.witherDoors.delete(existingDoor)
+                            this.witherDoor = null
                         }
                         if (doorType !== Room.UNKNOWN) existingDoor.type = doorType
                         this.markChanged()
@@ -1064,7 +1072,8 @@ class DungeonMap {
                     
                     let door = new Door(doorType, position, horizontal)
                     this.addDoor(door)
-                    if (door.type == Room.BLACK) this.witherDoors.add(door)
+                    // if (door.type == Room.BLACK) this.witherDoors.add(door)
+                    if (door.type == Room.BLACK) this.witherDoor = door
 
                     continue
                 }
@@ -1305,7 +1314,8 @@ class DungeonMap {
     }
 
     getCurrentRoom() {
-        return this.getRoomAt(Player.getX(), Player.getZ())
+        if (!this._currentRoom) return this.getRoomAt(Player.getX(), Player.getZ())
+        return this._currentRoom
     }
 
     roomGuiClicked(context, cursorX, cursorY, button, isPress) {

@@ -216,12 +216,12 @@ register("renderWorld", () => {
 
     if (settings.settings.boxDoors && !currentDungeonMap.bloodOpen) {
         let isOpenable = currentDungeonMap.keys >= 1
-        currentDungeonMap.witherDoors.forEach(door => {
-            let x = door.position.worldX - 1 // Round to nearest door location, incase map is too low quality to get exact block
-            let y = door.position.worldY - 1
+        let door = currentDungeonMap.witherDoor
+        if (!door) return
 
-            drawBoxAtBlock(x, 69, y, isOpenable ? 0 : 1, isOpenable ? 1 : 0, 0, 3, 4)
-        })
+        let x = door.position.worldX - 1 // Round to nearest door location, incase map is too low quality to get exact block
+        let y = door.position.worldY - 1
+        drawBoxAtBlock(x, 69, y, 3, 4, isOpenable ? 0 : 1, isOpenable ? 1 : 0, 0)
     }
 
     let curRoom = currentDungeonMap.getCurrentRoom();

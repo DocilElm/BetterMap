@@ -377,9 +377,10 @@ export const dungeonOffsetY = 200;
 
 export const isBetween = (number, min, max) => (number - min) * (number - max) <= 0
 
+/** @param {PlayerMP} player */
 export function getPlayerName(player) {
-    if (!player) return '???';
-    return ChatLib.removeFormatting(player.name ?? '???').replace(/[♲Ⓑ]/g, "").replace('§z', '').trim()
+    if (!player) return '???'
+    return player.getName().replace(/[♲Ⓑ]/g, "").replace("§z", "").trim()
 }
 
 /**
